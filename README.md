@@ -14,6 +14,10 @@ If your IP match's the carrier IP, it will be red, else will be green.
 Checks IP changes every 10 seconds. 
 
 ![image](https://github.com/melsy6666/BeardedSynergy.Desktop.IpHelper/assets/13814712/2ca92d36-409e-4920-b705-2ca9bc8c2291)
-
 ![image](https://github.com/melsy6666/BeardedSynergy.Desktop.IpHelper/assets/13814712/b2e435e7-2abf-40ab-91ca-73eb9efbebd2)
 
+
+The application can be hidden if the IP does not match the carrier IP. This is less intrusive as you only see it when the IP matches the carrier IP.
+
+Simple Context menu to close the application, or to make it visible if you hide it.
+![image](https://github.com/melsy6666/BeardedSynergy.Desktop.IpHelper/assets/13814712/ea8be54c-6529-4d47-bb37-090354a227a9)
