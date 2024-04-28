@@ -1,6 +1,7 @@
 ﻿using System.Net.Http;
 using System.Net;
 using System.Windows.Media;
+using System.Windows;
 
 namespace BeardedSynergy.Desktop.IpHelper;
 
@@ -11,6 +12,8 @@ public class MainWindowViewModel : ViewModelBase
     private SolidColorBrush _backGroundColor;
     private string _carrierIpAddress;
     private string _currentIpAddress;
+    private bool _hideOnNonCarrierIp;
+    private Visibility _mainWindowVisibility;
     private bool _topMost = true;
 
     public MainWindowViewModel(HttpClient httpClient)
@@ -40,12 +43,16 @@ public class MainWindowViewModel : ViewModelBase
             {
                 _carrierIpAddress = value;
                 ConfigurationService.ConfigurationModel.CarrierIpAddress = _carrierIpAddress;
-                ConfigurationService.WriteConfigFile(ConfigurationService.ConfigurationModel);
+                WriteToConfig();
                 OnPropertyChanged();
             }
         }
     }
+    private void WriteToConfig()
+    {
 
+        ConfigurationService.WriteConfigFile(ConfigurationService.ConfigurationModel);
+    }
     public string CurrentIpAddress
     {
         get { return _currentIpAddress; }
@@ -60,6 +67,35 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
+    public bool HideOnNonCarrierIp
+    {
+        get { return _hideOnNonCarrierIp; }
+        set
+        {
+            if (_hideOnNonCarrierIp != value)
+            {
+                _hideOnNonCarrierIp = value;
+                ConfigurationService.ConfigurationModel.HideOnNonCarrierIp = _hideOnNonCarrierIp;
+                
+                WriteToConfig();
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public Visibility MainWindowVisibility
+    {
+        get { return _mainWindowVisibility; }
+        set
+        {
+            if (_mainWindowVisibility != value)
+            {
+                _mainWindowVisibility = value;
+            }
+            OnPropertyChanged();
+        }
+    }
+
     public bool TopMost
     {
         get { return _topMost; }
@@ -68,6 +104,8 @@ public class MainWindowViewModel : ViewModelBase
             if (_topMost != value)
             {
                 _topMost = value;
+                ConfigurationService.ConfigurationModel.AlwaysOnTop = _topMost;
+                WriteToConfig();
                 OnPropertyChanged();
             }
         }

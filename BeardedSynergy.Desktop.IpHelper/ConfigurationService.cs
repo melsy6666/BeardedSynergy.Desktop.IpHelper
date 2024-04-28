@@ -55,5 +55,7 @@ public class ConfigurationModel
         CarrierIpAddress = carrierIp;
     }
 
+    public bool AlwaysOnTop { get; set; }
     public string CarrierIpAddress { get; set; }
+    public bool HideOnNonCarrierIp { get; set; }
 }

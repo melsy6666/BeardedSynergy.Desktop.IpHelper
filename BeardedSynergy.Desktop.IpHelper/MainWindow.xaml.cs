@@ -60,7 +60,10 @@ public partial class MainWindow : Window
         this.DataContext = this;
         _configurationModel = ConfigurationService.GetConfigurationFromDisk();
         MainWindowViewModel.CarrierIpAddress = _configurationModel.CarrierIpAddress;
+        MainWindowViewModel.HideOnNonCarrierIp = _configurationModel.HideOnNonCarrierIp;
+        MainWindowViewModel.TopMost = _configurationModel.AlwaysOnTop;
         _checkDateTime = DateTime.Now;
+
         Task.Run(async () => await ExecuteMainLoop());
     }
 
@@ -68,7 +71,7 @@ public partial class MainWindow : Window
 
     private void ClickClose(object sender, RoutedEventArgs e)
     {
-        Application.Current.Shutdown();
+        Environment.Exit(1);
     }
 
     public async Task ExecuteMainLoop()
@@ -88,14 +91,22 @@ public partial class MainWindow : Window
                     if (MainWindowViewModel.CurrentIpAddress == ConfigurationService.ConfigurationModel.CarrierIpAddress)
                     {
                         MainWindowViewModel.BackGroundColor = _red;
+                        if (MainWindowViewModel.HideOnNonCarrierIp)
+                        {
+                            MainWindowViewModel.MainWindowVisibility = Visibility.Visible;
+                        }
                     }
                     else
                     {
                         MainWindowViewModel.BackGroundColor = _green;
+                        if (MainWindowViewModel.HideOnNonCarrierIp)
+                        {
+                            MainWindowViewModel.MainWindowVisibility = Visibility.Collapsed;
+                        }
+                        this.Dispatcher.Invoke(() => MainWindowViewModel.BackGroundColor.Freeze());
+                        _checkDateTime = DateTime.Now.AddSeconds(_checkInterval);
+                        _previousIpAddress = _currentIpAddress;
                     }
-                    this.Dispatcher.Invoke(() => MainWindowViewModel.BackGroundColor.Freeze());
-                    _checkDateTime = DateTime.Now.AddSeconds(_checkInterval);
-                    _previousIpAddress = _currentIpAddress;
                 }
             }
             catch (Exception ex)
