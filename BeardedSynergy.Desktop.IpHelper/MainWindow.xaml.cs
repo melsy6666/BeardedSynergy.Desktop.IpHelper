@@ -1,10 +1,12 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Diagnostics;
+using System.Security.RightsManagement;
 
 namespace BeardedSynergy.Desktop.IpHelper;
 
@@ -22,6 +24,7 @@ public partial class MainWindow : Window
     // Seconds to check IP Address
     private const int _checkInterval = 10;
 
+    private const int _checkIntervalMillis = 10000;
     private readonly ConfigurationModel _configurationModel;
     private readonly HttpClient _httpClient;
     private DateTime _checkDateTime;
@@ -62,9 +65,9 @@ public partial class MainWindow : Window
         MainWindowViewModel.CarrierIpAddress = _configurationModel.CarrierIpAddress;
         MainWindowViewModel.HideOnNonCarrierIp = _configurationModel.HideOnNonCarrierIp;
         MainWindowViewModel.TopMost = _configurationModel.AlwaysOnTop;
-        _checkDateTime = DateTime.Now;
+        _checkDateTime = DateTime.UtcNow;
 
-        Task.Run(async () => await ExecuteMainLoop());
+        Task.Run(async () => await ExecuteMainLoopStopwatch());
     }
 
     public MainWindowViewModel MainWindowViewModel { get; set; }
@@ -74,15 +77,18 @@ public partial class MainWindow : Window
         Environment.Exit(1);
     }
 
-    public async Task ExecuteMainLoop()
+    public async Task ExecuteMainLoopStopwatch()
     {
+        var sw = Stopwatch.StartNew();
+        var firstRun = true;
         while (true)
         {
             try
             {
-                if (DateTime.Now > _checkDateTime)
+                if (sw.ElapsedMilliseconds > _checkIntervalMillis || firstRun)
                 {
                     _currentIpAddress = await MainWindowViewModel.GetIpAddress();
+                    sw.Restart();
                     if (_previousIpAddress == _currentIpAddress)
                     {
                         continue;
@@ -104,15 +110,18 @@ public partial class MainWindow : Window
                             MainWindowViewModel.MainWindowVisibility = Visibility.Collapsed;
                         }
                         this.Dispatcher.Invoke(() => MainWindowViewModel.BackGroundColor.Freeze());
-                        _checkDateTime = DateTime.Now.AddSeconds(_checkInterval);
+                        //_checkDateTime = DateTime.UtcNow.AddSeconds(_checkInterval);
+                        //sw.Restart();
                         _previousIpAddress = _currentIpAddress;
                     }
+                    firstRun = false;
                 }
             }
             catch (Exception ex)
             {
                 var t = ex;
             }
+            Thread.Sleep(100);
         }
     }
 
